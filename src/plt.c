@@ -21,7 +21,7 @@ vsuplt_init_ctx(vsuplt_ctx *ctx,
         void *buffer, size_t buff_sz_bytes,
         size_t width, size_t height)
 {
-    memset(buffer, 0xFF, width*height*VSUPLT_PIXEL_SZ);
+    memset(buffer, 0x0, width*height*VSUPLT_PIXEL_SZ);
 
     ctx->w = width;
     ctx->h = height;
@@ -69,7 +69,7 @@ PIXEL vsuplt_get_px(vsuplt_ctx *ctx, int x, int y)
     int index = PIXEL_INDEX(x, y, ctx->w, ctx->h);
     if (index == _INDEX_OUT_OF_BOUNDS)
         return VSUPLT_OUT_OF_BOUNDS;
-    return 0x00FFFFFF & ctx->buff[index];
+    return 0x80FFFFFF & ctx->buff[index];
 }
 
 int vsuplt_set_px(vsuplt_ctx *ctx, int x, int y, PIXEL clr)
@@ -157,19 +157,20 @@ _vsuplt_line_y(vsuplt_ctx *ctx, int x0, int y0, int x1, int y1, PIXEL clr)
     }
 }
 void
-vsuplt_line(vsuplt_ctx *ctx, int x0, int y0, int x1, int y1, PIXEL clr)
+vsuplt_line_px(vsuplt_ctx *ctx, int x0, int y0, int x1, int y1, PIXEL clr)
 {
     register int W = x1 - x0;
     if (W < 0) W = -W;
     register int H = y1 - y0;
     if (H < 0) H = -H;
-    /* octants 1,4,5,8 */
     if (W > H)
     {
+        /* octants 1,4,5,8 */
         _vsuplt_line_x(ctx, x0, y0, x1, y1, clr);
     }
     else
     {
+        /* 2,3,6,7 */
         _vsuplt_line_y(ctx, x0, y0, x1, y1, clr);
     }
 }
@@ -204,6 +205,7 @@ int vsuplt_print_ppm(vsuplt_ctx *ctx, FILE *out)
              *        VSUPLT_B(p));
              */
             unsigned char pixel[3] = { VSUPLT_R(p), VSUPLT_G(p), VSUPLT_B(p) };
+            if (VSUPLT_IS_OPAQUE(p) == 0) pixel[0]=pixel[1]=pixel[3]=0;
             fwrite_unlocked(pixel, 3, 1, out);
         }
     }

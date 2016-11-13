@@ -42,7 +42,10 @@ install(TARGETS vsuplt
     EXPORT vsuplt-config
     DESTINATION lib)
 # will install ${PREFIX}/include/vsu/plt.h
-install(DIRECTORY include DESTINATION include)
+# NOTA BENE: slash at the end of 'include/' is mandatory
+# otherwise installation path would contain excessive 'include' like below:
+# ${CMAKE_INSTALL_PREFIX}/include/include/vsu/plt.h
+install(DIRECTORY include/ DESTINATION include)
 # ${PREFIX}/share/libvsu/plt/vsuplt-config.cmake
 # for importing libvsuplt as installed target
 install(EXPORT vsuplt-config DESTINATION share/libvsu/)
