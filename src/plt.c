@@ -30,6 +30,10 @@ vsuplt_init_ctx(vsuplt_ctx *ctx,
 
     ctx->must_free_buff = false;
     ctx->must_free_self = false;
+    
+    /* TODO: remove from plt.c */
+    ctx->ctm.T = AFFINE2_ID;
+    ctx->ctm.prev = NULL;
 }
 
 void

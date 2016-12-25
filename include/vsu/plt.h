@@ -1,8 +1,6 @@
 #ifndef _VSUPLT_H_
 #define _VSUPLT_H_
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <vsu/num.h>
 
 /*
@@ -99,7 +97,7 @@ vsuplt_set_affine(vsuplt_ctx *ctx, struct affine2 t);
 
 /* line from (x0,y0) to (x1,y1) in user coordinates */
 void
-vsuplt_line(vsuplt_ctx *ctx, RR x0, RR y0, RR x1, RR y1);
+vsuplt_line(vsuplt_ctx *ctx, RR x0, RR y0, RR x1, RR y1, PIXEL clr);
 
 /*
  * encoding
@@ -128,5 +126,7 @@ int vsuplt_print_ppm_file(vsuplt_ctx *ctx, char *outfname);
 #define VSUPLT_BLUE  0x800000FF
 #define VSUPLT_BLACK 0x80000000
 #define VSUPLT_WHITE 0x80FFFFFF
-
+#define VSUPLT_PURPLE 0x80800080
+#define VSUPLT_MAGENTA 0x80FF00FF
+#define VSUPLT_BROWN 0x80A52A2A
 #endif

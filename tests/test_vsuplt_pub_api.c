@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <err.h>
 #include <vsu/plt.h>
+#include <math.h>
 
-#define _IMG_W (768)
-#define _IMG_H (512)
+#define _IMG_W (1536)
+#define _IMG_H (1536)
 #define _IMG_BUF_SZ (_IMG_W * _IMG_H * VSUPLT_PIXEL_SZ)
 
 #define _MSG_DOESNT_SET_PIXEL \
@@ -12,9 +13,9 @@
 #define _MSG_DOESNT_RESET_PIXEL \
     "vsuplt_init_ctx doesn't reset pixels"
 
+unsigned char buf[_IMG_BUF_SZ];
 int main()
 {
-    unsigned char buf[_IMG_BUF_SZ];
     vsuplt_ctx ctx;
     vsuplt_init_ctx(&ctx, buf, _IMG_BUF_SZ, _IMG_W, _IMG_H);
 
@@ -62,7 +63,7 @@ int main()
                 err(1, "vsuplt_clear doesn't clear");
     int x0 = _IMG_W/2;
     int y0 = _IMG_H/2;
-    int a = 128, b = 64;
+    int a = _IMG_W/6, b = _IMG_H/3;
     vsuplt_line_px(&ctx, x0, y0, x0+a, y0+b, VSUPLT_RED);
     vsuplt_line_px(&ctx, x0, y0, x0-a, y0+b, VSUPLT_BLUE);
     vsuplt_line_px(&ctx, x0, y0, x0+a, y0-b, VSUPLT_BLUE);
@@ -71,7 +72,26 @@ int main()
     vsuplt_line_px(&ctx, x0, y0, x0+b, y0-a, VSUPLT_GREEN);
     vsuplt_line_px(&ctx, x0, y0, x0-b, y0-a, VSUPLT_GREEN);
     vsuplt_line_px(&ctx, x0, y0, x0-b, y0+a, VSUPLT_BLACK);
+    vsuplt_line_px(&ctx, x0, y0, x0-a, y0,   VSUPLT_PURPLE);
+    vsuplt_line_px(&ctx, x0, y0, x0+a, y0,   VSUPLT_MAGENTA);
     vsuplt_print_ppm_file(&ctx, "test_vsuplt_line_px.ppm");
+
+    vsuplt_clear(&ctx, VSUPLT_WHITE);
+    vsuplt_save_ctm(&ctx);
+    vsuplt_tr(&ctx, x0, y0);
+    int n = 8; 
+    for (int k = 0; k < 2*n; ++k) {
+        vsuplt_line(&ctx, 0, 0, a, 0, VSUPLT_RED);
+        vsuplt_rot(&ctx, M_PI/n);
+    }
+    vsuplt_restore_ctm(&ctx);
+    vsuplt_tr(&ctx, .1*_IMG_W, .1*_IMG_H);
+    vsuplt_scale(&ctx, .8*_IMG_W, .8*_IMG_H);
+    vsuplt_line(&ctx, 0, 0, 1, 0, VSUPLT_BROWN);
+    vsuplt_line(&ctx, 1, 0, 1, 1, VSUPLT_BROWN);
+    vsuplt_line(&ctx, 1, 1, 0, 1, VSUPLT_BROWN);
+    vsuplt_line(&ctx, 0, 1, 0, 0, VSUPLT_BROWN);
+    vsuplt_print_ppm_file(&ctx, "test_vsuplt_line.ppm");
     vsuplt_destroy_ctx(&ctx);
     return 0;
 }
