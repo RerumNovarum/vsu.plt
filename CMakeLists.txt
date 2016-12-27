@@ -50,18 +50,14 @@ install(DIRECTORY include/ DESTINATION include)
 # for importing libvsuplt as installed target
 install(EXPORT vsuplt-config DESTINATION share/libvsu/)
 
-find_package(PkgConfig)
-pkg_check_modules(XCB xcb)
-include_directories(${XCB_INCLUDE_DIR})
-add_library(vsushowplot SHARED src/showplot.c)
-target_link_libraries(vsushowplot vsunum vsuplt ${XCB_LIBRARIES})
-message(STATUS "x11: ${XCB_LIBRARIES}")
+add_library(vsuplt_camera2 src/camera2-fb.c)
+target_link_libraries(vsuplt_camera2 vsunum vsuplt)
 
 
 enable_testing()
 add_executable(test_plt_api tests/test_vsuplt_pub_api.c)
 target_link_libraries(test_plt_api vsuplt)
 add_test(test_plt_api test_plt_api)
-add_executable(test_showplot tests/showplot.c)
-target_link_libraries(test_showplot vsushowplot)
-add_test(test_showplot test_showplot)
+add_executable(test_camera2 tests/camera2-fb.c)
+target_link_libraries(test_camera2 vsuplt_camera2)
+add_test(test_camera2 test_camera2)

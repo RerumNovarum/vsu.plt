@@ -27,10 +27,6 @@ struct vsuplt_ctm
     vsuplt_ctm *prev;
 };
 
-/*
- * for compiler to be able to determine size of structure
- * do NOT access struct members directly
- */
 struct vsuplt_ctx
 {
     size_t w, h;
