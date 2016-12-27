@@ -50,8 +50,8 @@ install(DIRECTORY include/ DESTINATION include)
 # for importing libvsuplt as installed target
 install(EXPORT vsuplt-config DESTINATION share/libvsu/)
 
-add_library(vsuplt_camera2 src/camera2-fb.c)
-target_link_libraries(vsuplt_camera2 vsunum vsuplt)
+add_library(vsuplt_camera2-fb src/camera2-fb.c)
+target_link_libraries(vsuplt_camera2-fb vsunum vsuplt)
 
 
 enable_testing()
@@ -59,5 +59,5 @@ add_executable(test_plt_api tests/test_vsuplt_pub_api.c)
 target_link_libraries(test_plt_api vsuplt)
 add_test(test_plt_api test_plt_api)
 add_executable(test_camera2-fb tests/camera2-fb.c)
-target_link_libraries(test_camera2-fb vsuplt_camera2)
+target_link_libraries(test_camera2-fb vsuplt_camera2-fb)
 # add_test(test_camera2 test_camera2)
