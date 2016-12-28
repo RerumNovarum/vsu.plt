@@ -17,6 +17,5 @@ struct vsuplt_camera2
 };
 
 void
-vsuplt_camera2_fb_show(struct vsuplt_camera2 *cam);
-
+vsuplt_camera2_show(struct vsuplt_camera2 *cam);
 #endif

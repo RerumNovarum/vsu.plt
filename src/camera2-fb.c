@@ -126,7 +126,7 @@ handle_navigation_key(char c, struct vsuplt_camera2 *cam)
 /* public routine */
 
 void
-vsuplt_camera2_fb_show(struct vsuplt_camera2 *cam)
+vsuplt_camera2_show(struct vsuplt_camera2 *cam)
 {
     int ret;
     int fb_fd;
