@@ -58,6 +58,9 @@ pkg_check_modules(GTK REQUIRED gtk+-3.0)
 add_library(vsuplt_camera2-gtk src/camera2-gtk.c)
 target_include_directories(vsuplt_camera2-gtk PRIVATE ${GTK_INCLUDE_DIRS})
 target_link_libraries(vsuplt_camera2-gtk vsunum vsuplt ${GTK_LIBRARIES})
+install(TARGETS vsuplt_camera2-gtk
+    EXPORT vsuplt-config
+    DESTINATION lib)
 
 enable_testing()
 add_executable(test_plt_api tests/test_vsuplt_pub_api.c)

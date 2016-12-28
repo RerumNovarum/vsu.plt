@@ -14,6 +14,7 @@ struct vsuplt_camera2
     void (*redraw)(struct vsuplt_camera2 *cam); /* callback to update the plot, set by client */
     int (*flush_to_device)(struct vsuplt_camera2 *cam); /* flush buffer from g to the device */
     void (*post_init)(struct vsuplt_camera2 *cam);
+    int (*on_click_prim)(struct vsuplt_camera2 *cam); /* mouse click callback; if cb returns true, image will be redrawn */
 };
 
 void

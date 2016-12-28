@@ -36,6 +36,22 @@ static void destroy_cb(GtkApplication *app, struct vsuplt_cairo_dev *dev)
     }
 }
 
+static gboolean
+button_cb(GtkWidget *w, GdkEventButton *e, struct vsuplt_cairo_dev *dev)
+{
+    if (dev == NULL) return FALSE;
+    if (dev->cam == NULL) return FALSE;
+    if (e->state & GDK_BUTTON_PRIMARY) {
+        if (dev->cam->on_click_prim == NULL) return FALSE;
+        if ((*(dev->cam->on_click_prim))(dev->cam)) {
+            GtkAllocation allocation;
+            gtk_widget_get_allocation(w, &allocation);
+            gtk_widget_queue_draw_area(w, 0, 0, allocation.width, allocation.height);
+        }
+    }
+    return TRUE;
+}
+
 static gpointer
 motion_cb(GtkWidget *w, GdkEventMotion *e, struct vsuplt_cairo_dev *dev)
 {
@@ -175,6 +191,7 @@ activate(GApplication *app,
     g_signal_connect(w, "destroy", G_CALLBACK(destroy_cb), user_data);
     g_signal_connect(canvas, "draw", G_CALLBACK(draw_cb), user_data);
     g_signal_connect(canvas, "motion-notify-event", G_CALLBACK(motion_cb), user_data);
+    g_signal_connect(canvas, "button-press-event", G_CALLBACK(button_cb), user_data);
 
     gtk_widget_set_events(canvas, gtk_widget_get_events(canvas)
                                   | GDK_POINTER_MOTION_MASK
