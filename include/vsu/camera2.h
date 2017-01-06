@@ -12,9 +12,10 @@ struct vsuplt_camera2
     vsuplt_ctx *g; /* source of graphics content */
     void *device; /* device-specific data; must be ignored by client */
     void (*redraw)(struct vsuplt_camera2 *cam); /* callback to update the plot, set by client */
-    int (*flush_to_device)(struct vsuplt_camera2 *cam); /* flush buffer from g to the device */
+    int  (*flush_to_device)(struct vsuplt_camera2 *cam); /* flush buffer from g to the device */
     void (*post_init)(struct vsuplt_camera2 *cam);
-    int (*on_click_prim)(struct vsuplt_camera2 *cam); /* mouse click callback; if cb returns true, image will be redrawn */
+    int  (*click_prim)(struct vsuplt_camera2 *cam); /* mouse click callback; if cb returns true, image will be redrawn */
+    int  (*nav_tr)(struct vsuplt_camera2 *cam, RR dx, RR dy);
 };
 
 void

@@ -42,14 +42,23 @@ button_cb(GtkWidget *w, GdkEventButton *e, struct vsuplt_cairo_dev *dev)
     if (dev == NULL) return FALSE;
     if (dev->cam == NULL) return FALSE;
     if (e->state & GDK_BUTTON_PRIMARY) {
-        if (dev->cam->on_click_prim == NULL) return FALSE;
-        if ((*(dev->cam->on_click_prim))(dev->cam)) {
+        if (dev->cam->click_prim == NULL) return FALSE;
+        if ((*(dev->cam->click_prim))(dev->cam)) {
             GtkAllocation allocation;
             gtk_widget_get_allocation(w, &allocation);
             gtk_widget_queue_draw_area(w, 0, 0, allocation.width, allocation.height);
         }
     }
     return TRUE;
+}
+
+int vsuplt_camera2_navig_translate(struct vsuplt_camera2 *cam, RR dx, RR dy)
+{
+    cam->L += -dx;
+    cam->R += -dx;
+    cam->B += dy;
+    cam->T += dy;
+    return 1;
 }
 
 static gpointer
@@ -65,10 +74,9 @@ motion_cb(GtkWidget *w, GdkEventMotion *e, struct vsuplt_cairo_dev *dev)
             gtk_widget_get_allocation(w, &allocation);
             dx /= allocation.width;
             dy /= allocation.height;
-            dev->cam->L += -dx;
-            dev->cam->R += -dx;
-            dev->cam->B += dy;
-            dev->cam->T += dy;
+            if (dev->cam->nav_tr != NULL) {
+                (*(dev->cam->nav_tr))(dev->cam, -dx, dy);
+            }
             gtk_widget_queue_draw_area(w, 0, 0, allocation.width, allocation.height);
         }
         dev->navig_pressed = e->state & GDK_BUTTON1_MASK;
