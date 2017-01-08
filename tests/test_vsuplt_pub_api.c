@@ -91,6 +91,8 @@ int main()
     vsuplt_plot2_line(plot, 1, 0, 1, 1, VSUPLT_COLOR_BROWN);
     vsuplt_plot2_line(plot, 1, 1, 0, 1, VSUPLT_COLOR_BROWN);
     vsuplt_plot2_line(plot, 0, 1, 0, 0, VSUPLT_COLOR_BROWN);
+    vsuplt_plot2_line(plot, 0, 0, .5, .5, VSUPLT_COLOR_RED);
+    vsuplt_plot2_line(plot, .5, .5, 1, 0, VSUPLT_COLOR_MAGENTA);
     vsuplt_plot2_print_ppm_file(plot, "test_vsuplt_plot2_line.ppm");
 
     vsuplt_plot2_free(plot);

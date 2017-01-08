@@ -19,9 +19,8 @@ vsuplt_plot2_init(vsuplt_plot2_ptr plot2,
      *       though multiplication seem to be
      *       more symbolic and self-explaining
      */
-    plot2->ctm.T = affine2mul_n(3,
-            affine2tr(0, buf_height),
-            affine2scale((R-L)/buf_width,-(T-B)/buf_height),
+    plot2->ctm.T = affine2mul(
+            affine2scale((R-L)/buf_width, (T-B)/buf_height),
             affine2tr(-L, -B));
     plot2->must_free_self = must_free_self;
 }

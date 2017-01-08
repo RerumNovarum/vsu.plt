@@ -10,7 +10,7 @@ if(NOT TARGET vsunum)
     find_package(vsunum)
 endif()
 
-add_library(vsuplt src/bmp.c src/plot2.c)
+add_library(vsuplt src/bmp.c src/plot2.c src/wireframe.c)
 target_link_libraries(vsuplt vsunum)
 
 # REMINDER
@@ -51,6 +51,11 @@ install(DIRECTORY include/ DESTINATION include)
 install(EXPORT vsuplt-config DESTINATION share/libvsu/)
 
 enable_testing()
+
 add_executable(test_plt_api tests/test_vsuplt_pub_api.c)
 target_link_libraries(test_plt_api vsuplt)
 add_test(test_plt_api test_plt_api)
+
+add_executable(test_plot2_wireframe tests/wireframe.c)
+target_link_libraries(test_plot2_wireframe vsuplt)
+add_test(test_plot2_wireframe test_plot2_wireframe)
