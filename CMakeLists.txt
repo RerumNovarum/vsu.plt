@@ -10,7 +10,7 @@ if(NOT TARGET vsunum)
     find_package(vsunum)
 endif()
 
-add_library(vsuplt src/plt.c src/plt-affine.c)
+add_library(vsuplt src/bmp.c src/plot2.c)
 target_link_libraries(vsuplt vsunum)
 
 # REMINDER
