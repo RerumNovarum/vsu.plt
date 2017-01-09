@@ -34,6 +34,6 @@ vsuplt_term_input(vsuplt_term_input_ptr cfg)
 	set_stdin_mode(cfg);
 	while (read(STDIN_FILENO, &c, 1) > 0)
         if (cfg->handlers[(int)c] != NULL)
-            (*(cfg->handlers[(int)c]))(cfg, c);
+            (cfg->handlers[(int)c])(cfg, c);
 	reset_stdin_mode(cfg);
 }

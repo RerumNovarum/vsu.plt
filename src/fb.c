@@ -93,7 +93,10 @@ vsuplt_fb_show2(vsuplt_fb_ptr fb)
 	if (fb->post_init != NULL)
 		(fb->post_init)(fb);
 	if (fb->bmp == NULL) err(1, "vsuplt_fb_show2: no bmp");
+	for (int i = 0; i < sizeof(fb->in.handlers)/sizeof(*fb->in.handlers); ++i)
+		fb->in.handlers[i] = NULL;
 	fb->in.handlers['i'] = fb->in.handlers['j'] =
+		fb->in.handlers['l'] = fb->in.handlers['h'] =
 		fb->in.handlers['k'] = fb->in.handlers['+'] =
 		fb->in.handlers['-'] = fb->in.handlers['r'] =
 		fb->in.handlers['R'] = _on_navig2;
