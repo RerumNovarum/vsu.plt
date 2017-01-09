@@ -24,6 +24,8 @@ struct vsuplt_fb
 	void *userdata;
 	void (*post_init)(vsuplt_fb_ptr);
 	void (*redraw)(vsuplt_fb_ptr);
+    struct affine2 rot_positive;
+    struct affine2 rot_negative;
 };
 
 void

@@ -29,7 +29,7 @@ vsuplt_fb_flush(vsuplt_fb_ptr fb)
 		o = lseek(fb->fb_fd, o, SEEK_SET);
 		if (o == -1) continue;
 		for (long x = 0; x < fb->fb_w; ++x) {
-			vsuplt_clr clr = vsuplt_bmp_get(bmp, x, y);
+			vsuplt_clr clr = vsuplt_bmp_get(bmp, x, bmp->h - y - 1);
 			uint32_t px = rgb(fb, VSUPLT_R(clr), VSUPLT_G(clr), VSUPLT_B(clr));
 			if (write(fb->fb_fd, &px, 4) != 4) {
 				err(1, "vsuplt_fb_draw_bmp failed to write");
@@ -69,10 +69,11 @@ void _on_navig2(vsuplt_term_input_ptr incfg, char c)
 		case 'k': T.b2 = +fb->dy; break;
 		case '+': T.a11 = fb->dscalex;     T.a22 = fb->dscaley; break;
 		case '-': T.a11 = 1.0/fb->dscalex; T.a22 = 1.0/fb->dscaley; break;
-		case 'r': T = affine2rot(fb->dphi); break;
-		case 'R': T = affine2rot(-fb->dphi); break;
+		case 'r': T = fb->rot_positive; break;
+		case 'R': T = fb->rot_negative; break;
 	}
-	*(struct affine2*)fb->ctm = affine2mul(T, *(struct affine2*)fb->ctm);
+    struct affine2 *ctm_ptr = fb->ctm;
+	*ctm_ptr = affine2mul(T, *ctm_ptr);
 	(*fb->redraw)(fb);
 	vsuplt_fb_flush(fb);
 }
@@ -93,6 +94,7 @@ vsuplt_fb_show2(vsuplt_fb_ptr fb)
 	if (fb->post_init != NULL)
 		(fb->post_init)(fb);
 	if (fb->bmp == NULL) err(1, "vsuplt_fb_show2: no bmp");
+    fb->in.self = fb;
 	for (int i = 0; i < sizeof(fb->in.handlers)/sizeof(*fb->in.handlers); ++i)
 		fb->in.handlers[i] = NULL;
 	fb->in.handlers['i'] = fb->in.handlers['j'] =
@@ -100,6 +102,14 @@ vsuplt_fb_show2(vsuplt_fb_ptr fb)
 		fb->in.handlers['k'] = fb->in.handlers['+'] =
 		fb->in.handlers['-'] = fb->in.handlers['r'] =
 		fb->in.handlers['R'] = _on_navig2;
+    fb->rot_positive = affine2mul_n(3,
+            affine2tr(.5*fb->bmp->w, .5*fb->bmp->h),
+            affine2rot(fb->dphi),
+            affine2tr(-.5*fb->bmp->w, -.5*fb->bmp->h));
+    fb->rot_negative = affine2mul_n(3,
+            affine2tr(.5*fb->bmp->w, .5*fb->bmp->h),
+            affine2rot(-fb->dphi),
+            affine2tr(-.5*fb->bmp->w, -.5*fb->bmp->h));
 	fb->redraw(fb);
 	vsuplt_fb_flush(fb);
 	vsuplt_term_input(&fb->in);
