@@ -120,9 +120,6 @@ int main()
     fb.post_init = post_init;
     fb.redraw = redraw;
     fb.userdata = &d;
-    fb.dx = fb.dy = 4;
-    fb.dscalex = fb.dscaley = 2;
-    fb.dphi = 1e-2;
     FILE *in = fmemopen(wf_encoded, strlen(wf_encoded), "r");
     d.wf = vsuplt_wireframe_load(in);
     d.t_dphi = affine2rot(DPHI);

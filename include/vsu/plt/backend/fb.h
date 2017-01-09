@@ -16,7 +16,6 @@ struct vsuplt_fb
 	struct fb_fix_screeninfo finf;
 	struct fb_var_screeninfo vinf;
 	vsuplt_bmp_ptr bmp;
-	RR dx, dy, dscalex, dscaley, dphi;
 	int fb_fd;
 	size_t fb_w, fb_h;
 	char *fb_fname;
