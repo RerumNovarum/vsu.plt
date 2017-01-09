@@ -10,7 +10,7 @@ if(NOT TARGET vsunum)
     find_package(vsunum)
 endif()
 
-add_library(vsuplt src/bmp.c src/plot2.c src/wireframe.c)
+add_library(vsuplt src/bmp.c src/plot2.c src/wireframe.c src/fb.c src/terminal-input.c)
 target_link_libraries(vsuplt vsunum)
 
 # REMINDER
@@ -50,6 +50,9 @@ install(DIRECTORY include/ DESTINATION include)
 # for importing libvsuplt as installed target
 install(EXPORT vsuplt-config DESTINATION share/libvsu/)
 
+add_executable(test_fb_interactive tests/fb-interactive.c)
+target_link_libraries(test_fb_interactive vsuplt)
+
 enable_testing()
 
 add_executable(test_plt_api tests/test_vsuplt_pub_api.c)
@@ -59,3 +62,7 @@ add_test(test_plt_api test_plt_api)
 add_executable(test_plot2_wireframe tests/wireframe.c)
 target_link_libraries(test_plot2_wireframe vsuplt)
 add_test(test_plot2_wireframe test_plot2_wireframe)
+
+add_executable(test_fb_flush tests/fb-flush.c)
+target_link_libraries(test_fb_flush vsuplt)
+add_test(test_fb_flush test_fb_flush)

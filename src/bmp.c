@@ -47,6 +47,7 @@ vsuplt_bmp_alloc(size_t w, size_t h)
     };
 
     memset(bytes, 0x0, w * h * sizeof(vsuplt_clr));
+	return bmp;
 }
 
 void

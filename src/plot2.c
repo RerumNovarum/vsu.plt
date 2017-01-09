@@ -41,6 +41,7 @@ vsuplt_plot2_alloc(size_t bmp_width, size_t bmp_height,
             L, R, B, T,
             /* must_free_buf */ false,
             /* must_free_self */ true);
+	return plot2;
 }
 
 void
