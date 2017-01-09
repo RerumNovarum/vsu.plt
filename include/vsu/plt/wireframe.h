@@ -13,6 +13,7 @@ struct vsuplt_wireframe
     size_t E;
     size_t dim;
     RR *vertices;
+    RR *centroid;
     void *edges;
     struct affine2 ctm;
     bool must_free_v;
@@ -43,6 +44,10 @@ vsuplt_plot2_draw_wireframe(vsuplt_plot2_ptr plot,
 
 void
 vsuplt_wireframe2_transform(vsuplt_wireframe_ptr wf,
+        struct affine2 T);
+
+void
+vsuplt_wireframe2_transform_int(vsuplt_wireframe_ptr wf,
         struct affine2 T);
 
 #endif /* ifndef _VSUPLT_WIREFRAME2_H_ */

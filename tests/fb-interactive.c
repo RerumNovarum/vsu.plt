@@ -40,6 +40,8 @@ struct data
 {
     vsuplt_plot2_ptr plot;
     vsuplt_wireframe_ptr wf;
+    struct affine2 t_dphi;
+    struct affine2 t_dphi_inv;
 };
 
 void post_init(vsuplt_fb_ptr fb)
@@ -61,6 +63,55 @@ void redraw(vsuplt_fb_ptr fb)
     vsuplt_plot2_draw_wireframe(d->plot, d->wf);
 }
 
+#define DX 8
+#define DY 8
+#define DSCALEX 1.2
+#define DSCALEY 1.2
+#define DPHI 1e-2
+
+void _on_navig2(vsuplt_term_input_ptr incfg, char c)
+{
+	vsuplt_fb_ptr fb = incfg->self;
+    struct data *d = fb->userdata;
+    vsuplt_wireframe_ptr wf = d->wf;
+	switch (c)
+	{
+        case 'l':
+            vsuplt_wireframe2_transform(wf, affine2tr(DX, 0));
+            break;
+        case 'h':
+            vsuplt_wireframe2_transform(wf, affine2tr(-DX, 0));
+            break;
+        case 'j':
+            vsuplt_wireframe2_transform(wf, affine2tr(0, -DY));
+            break;
+        case 'k':
+            vsuplt_wireframe2_transform(wf, affine2tr(0, DY));
+            break;
+        case '+':
+            /* vsuplt_wireframe2_transform_int
+             * translates the origin of coordinates to the centroid of wireframe
+             * applies T
+             * and translates back.
+             * 
+             * we use it for scaling and rotation.
+             */
+            vsuplt_wireframe2_transform_int(wf, affine2scale(DSCALEX, DSCALEY));
+            break;
+        case '-':
+            vsuplt_wireframe2_transform_int(wf, affine2scale(1.0/DSCALEX, 1.0/DSCALEY));
+            break;
+        case 'r':
+            vsuplt_wireframe2_transform_int(wf, d->t_dphi);
+            break;
+        case 'R':
+            vsuplt_wireframe2_transform_int(wf, d->t_dphi_inv);
+            break;
+
+	}
+	vsuplt_fb_redraw_flush(fb);
+}
+
 int main()
 {
     struct vsuplt_fb fb;
@@ -74,7 +125,12 @@ int main()
     fb.dphi = 1e-2;
     FILE *in = fmemopen(wf_encoded, strlen(wf_encoded), "r");
     d.wf = vsuplt_wireframe_load(in);
-    fb.ctm = &d.wf->ctm;
+    d.t_dphi = affine2rot(DPHI);
+    d.t_dphi_inv = affine2rot(-DPHI);
+    for (int i = 0; i < sizeof(fb.in.handlers)/sizeof(*fb.in.handlers); ++i) {
+        fb.in.handlers[i] = _on_navig2;
+    }
+    fb.in.self = &fb;
     vsuplt_fb_show2(&fb);
     vsuplt_plot2_free(d.plot);
     vsuplt_wireframe_free(d.wf);

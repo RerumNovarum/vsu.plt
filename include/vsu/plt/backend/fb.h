@@ -20,12 +20,9 @@ struct vsuplt_fb
 	int fb_fd;
 	size_t fb_w, fb_h;
 	char *fb_fname;
-	void *ctm; /* looks ugly */
 	void *userdata;
 	void (*post_init)(vsuplt_fb_ptr);
 	void (*redraw)(vsuplt_fb_ptr);
-    struct affine2 rot_positive;
-    struct affine2 rot_negative;
 };
 
 void
@@ -33,6 +30,9 @@ vsuplt_fb_show2(vsuplt_fb_ptr fb);
 
 void
 vsuplt_fb_flush(vsuplt_fb_ptr fb);
+
+void
+vsuplt_fb_redraw_flush(vsuplt_fb_ptr fb);
 
 void
 vsuplt_fb_open(vsuplt_fb_ptr fb);

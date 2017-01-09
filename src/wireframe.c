@@ -13,9 +13,11 @@ vsuplt_wireframe_alloc(size_t V, size_t E, size_t dim)
     vsuplt_wireframe_ptr wf;
     size_t vertices_bytes_needed = sizeof(*wf->vertices)*dim*V;
     size_t edges_bytes_needed = (sizeof(uint32_t)*2 + sizeof(vsuplt_clr)) * E;
+    size_t centroid_bytes_needed = sizeof(*wf->centroid)*dim;
     size_t self_bytes_needed = sizeof(struct vsuplt_wireframe);
     size_t bytes_needed = vertices_bytes_needed +
-                          edges_bytes_needed + self_bytes_needed;
+                          edges_bytes_needed + self_bytes_needed +
+                          centroid_bytes_needed;
     void *bytes = malloc(bytes_needed);
     if (bytes == NULL) return NULL;
     wf = bytes;
@@ -23,10 +25,13 @@ vsuplt_wireframe_alloc(size_t V, size_t E, size_t dim)
     void *vertices = bytes;
     bytes += vertices_bytes_needed;
     void *edges = bytes;
+    bytes += edges_bytes_needed;
+    void *centroid = bytes;
     *wf = (struct vsuplt_wireframe)
             {
                 .vertices = vertices,
                 .edges = edges,
+                .centroid = centroid,
                 .V = V,
                 .E = E,
                 .dim = dim,
@@ -66,6 +71,7 @@ vsuplt_wireframe_load(FILE *in)
         for (int i = 0; i < dim; ++i) {
             long double x;
             fscanf(in, "%Lf", &x);
+            wf->centroid[i%wf->dim] += x/V;
             *(long double *)elt = x;
             elt += sizeof(x);
         }
@@ -99,9 +105,24 @@ void
 vsuplt_wireframe2_transform(vsuplt_wireframe_ptr wf,
         struct affine2 T)
 {
-    wf->ctm = affine2mul(wf->ctm, T);
+    wf->ctm = affine2mul(T, wf->ctm);
+    affine2rr(T, wf->centroid, wf->centroid + 1);
 }
 
+void
+vsuplt_wireframe2_transform_int(vsuplt_wireframe_ptr wf,
+        struct affine2 T)
+{
+    struct affine2 tr_inv = affine2tr(wf->centroid[0], wf->centroid[1]);
+    struct affine2 tr = tr_inv;
+    tr.b1 *= -1;
+    tr.b2 *= -1;
+    wf->ctm = affine2mul_n(4,
+            tr_inv,
+            T,
+            tr,
+            wf->ctm);
+}
 static inline uint32_t
 _wf_i(vsuplt_wireframe_ptr wf, uint32_t e) {
     return *(uint32_t*)(wf->edges + (2*sizeof(uint32_t) + sizeof(vsuplt_clr))*e);
