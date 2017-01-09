@@ -98,5 +98,6 @@ vsuplt_fb_show2(vsuplt_fb_ptr fb)
 		fb->in.handlers['-'] = fb->in.handlers['r'] =
 		fb->in.handlers['R'] = _on_navig2;
 	fb->redraw(fb);
+	vsuplt_fb_flush(fb);
 	vsuplt_term_input(&fb->in);
 }

@@ -62,6 +62,7 @@ int main()
     struct data d;
     fb.fb_fname = "/dev/fb0";
     fb.post_init = post_init;
+    fb.redraw = redraw;
     fb.userdata = &d;
     fb.dx = fb.dy = 4;
     fb.dscalex = fb.dscaley = 2;
