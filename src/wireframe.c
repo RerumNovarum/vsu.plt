@@ -106,7 +106,7 @@ vsuplt_wireframe2_transform(vsuplt_wireframe_ptr wf,
         struct affine2 T)
 {
     wf->ctm = affine2mul(T, wf->ctm);
-    affine2rr(T, wf->centroid, wf->centroid + 1);
+    affine2apply_rr(T, wf->centroid, wf->centroid + 1);
 }
 
 void
@@ -165,8 +165,8 @@ vsuplt_plot2_draw_wireframe(vsuplt_plot2_ptr plot,
         vsuplt_clr clr = _wf_clr(wf, e);
         RR x0 = _wf_x(wf, i), y0 = _wf_y(wf, i);
         RR x1 = _wf_x(wf, j), y1 = _wf_y(wf, j);
-        affine2rr(wf->ctm, &x0, &y0); 
-        affine2rr(wf->ctm, &x1, &y1); 
+        affine2apply_rr(wf->ctm, &x0, &y0); 
+        affine2apply_rr(wf->ctm, &x1, &y1); 
         vsuplt_plot2_line(plot, x0, y0, x1, y1, clr);
     }
 }
