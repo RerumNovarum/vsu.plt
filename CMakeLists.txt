@@ -34,6 +34,9 @@ target_include_directories(vsuplt PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
+add_executable(wireframe src/show-wireframe.c)
+target_link_libraries(wireframe vsuplt)
+
 # REMINDER
 # --------
 # libvsuplt.a will be installed to ${PREFIX}/lib/
@@ -46,6 +49,7 @@ install(TARGETS vsuplt
 # otherwise installation path would contain excessive 'include' like below:
 # ${CMAKE_INSTALL_PREFIX}/include/include/vsu/plt.h
 install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY assets DESTINATION share/libvsu/)
 # ${PREFIX}/share/libvsu/plt/vsuplt-config.cmake
 # for importing libvsuplt as installed target
 install(EXPORT vsuplt-config DESTINATION share/libvsu/)
