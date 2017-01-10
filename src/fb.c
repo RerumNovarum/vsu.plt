@@ -21,21 +21,21 @@ vsuplt_fb_flush(vsuplt_fb_ptr fb)
 {
 	vsuplt_bmp_ptr bmp = fb->bmp;
 	if (fb->fb_fd == -1)
-		 err(1, "vsuplt_fb_draw_bmp: bad fb_fd");
-	if (fb->vinf.bits_per_pixel != 32)
-		 err(1, "vsuplt_fb_draw_bmp: inconvenient value of bits_per_pixel");
-	for (long y = 0; y < fb->fb_h; ++y) {
-		off_t o = fb->vinf.xoffset + (y + fb->vinf.yoffset)*fb->finf.line_length;
-		o = lseek(fb->fb_fd, o, SEEK_SET);
-		if (o == -1) continue;
-		for (long x = 0; x < fb->fb_w; ++x) {
-			vsuplt_clr clr = vsuplt_bmp_get(bmp, x, bmp->h - y - 1);
-			uint32_t px = rgb(fb, VSUPLT_R(clr), VSUPLT_G(clr), VSUPLT_B(clr));
-			if (write(fb->fb_fd, &px, 4) != 4) {
-				err(1, "vsuplt_fb_draw_bmp failed to write");
-			}
-		}
-	}
+        err(1, "vsuplt_fb_draw_bmp: bad fb_fd");
+    if (fb->vinf.bits_per_pixel != 32)
+        err(1, "vsuplt_fb_draw_bmp: inconvenient value of bits_per_pixel");
+    for (long y = 0; y < fb->fb_h; ++y) {
+        off_t o = fb->vinf.xoffset + (y + fb->vinf.yoffset)*fb->finf.line_length;
+        o = lseek(fb->fb_fd, o, SEEK_SET);
+        if (o == -1) err(1, "lseek failed");
+        for (long x = 0; x < fb->fb_w; ++x) {
+            vsuplt_clr clr = vsuplt_bmp_get(bmp, x, bmp->h - y - 1);
+            uint32_t px = rgb(fb, VSUPLT_R(clr), VSUPLT_G(clr), VSUPLT_B(clr));
+            if (write(fb->fb_fd, &px, 4) != 4) {
+                err(1, "vsuplt_fb_draw_bmp failed to write");
+            }
+        }
+    }
 }
 
 void
@@ -45,8 +45,12 @@ vsuplt_fb_redraw_flush(vsuplt_fb_ptr fb)
     vsuplt_fb_flush(fb);
 }
 
-void _reload_dev_info(vsuplt_fb_ptr fb)
+void
+vsuplt_fb_open(vsuplt_fb_ptr fb)
 {
+	fb->fb_fd = open(fb->fb_fname, O_WRONLY);
+	if (fb->fb_fd == -1)
+		err(1, "vsuplt_fb_show: failed to open %s", fb->fb_fname);
 	if (fb->fb_fd == -1) err(1, "bad fb_fd");
 
 	int ret;
@@ -63,15 +67,6 @@ void _reload_dev_info(vsuplt_fb_ptr fb)
 
 	fb->fb_w = fb->vinf.xres_virtual;
 	fb->fb_h = fb->vinf.yres_virtual;
-}
-
-void
-vsuplt_fb_open(vsuplt_fb_ptr fb)
-{
-	fb->fb_fd = open(fb->fb_fname, O_WRONLY);
-	if (fb->fb_fd == -1)
-		err(1, "vsuplt_fb_show: failed to open %s", fb->fb_fname);
-	_reload_dev_info(fb);
 }
 
 void

@@ -50,7 +50,7 @@ _vsuplt_bresenhamline_y(void *self,
 
     if (y1 < y0)
     {
-        uint32_t tmp;
+        int64_t tmp;
         tmp = x0; x0 = x1; x1 = tmp;
         tmp = y0; y0 = y1; y1 = tmp;
     }

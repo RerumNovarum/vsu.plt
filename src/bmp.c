@@ -64,22 +64,25 @@ vsuplt_bmp_free(vsuplt_bmp_ptr bmp)
 }
 
 #define _BOUNDS_VALID(x, y, w, h) \
-    ( (0 <= (x) && (x) <= (w)) && (0 <= (y) && (y) <= (h)) )
-#define _VSUPLT_PIXEL(x,y) (*( bmp->buf + x + bmp->w*y ))
+    ( (0 <= (x) && (x) < (w)) && (0 <= (y) && (y) < (h)) )
+#define _VSUPLT_PIXEL(x,y) ( bmp->buf + x + bmp->w*y )
 
 vsuplt_clr
-vsuplt_bmp_get(vsuplt_bmp_ptr bmp, int32_t x, int32_t y)
+vsuplt_bmp_get(vsuplt_bmp_ptr bmp, int64_t x, int64_t y)
 {
     if (!_BOUNDS_VALID(x, y, bmp->w, bmp->h))
         return VSUPLT_BMP_OUT_OF_BOUNDS;
-    return 0x80FFFFFF & _VSUPLT_PIXEL(x, y);
+    vsuplt_clr *px = _VSUPLT_PIXEL(x, y);
+    return 0x80FFFFFF & *px;
 }
 
 void
-vsuplt_bmp_set(vsuplt_bmp_ptr bmp, int32_t x, int32_t y, vsuplt_clr clr)
+vsuplt_bmp_set(vsuplt_bmp_ptr bmp, int64_t x, int64_t y, vsuplt_clr clr)
 {
-    if (_BOUNDS_VALID(x, y, bmp->w, bmp->h))
-        _VSUPLT_PIXEL(x,y) = clr;
+    if (_BOUNDS_VALID(x, y, bmp->w, bmp->h)) {
+        vsuplt_clr *px = _VSUPLT_PIXEL(x, y);
+        *px = clr;
+    }
 }
 
 #undef _VSUPLT_PIXEL
@@ -110,8 +113,8 @@ void _bmp_put_pixel(void *self, int64_t x, int64_t y)
 
 void
 vsuplt_bmp_line(vsuplt_bmp_ptr bmp,
-        int32_t x0, int32_t y0,
-        int32_t x1, int32_t y1,
+        int64_t x0, int64_t y0,
+        int64_t x1, int64_t y1,
         vsuplt_clr clr)
 {
     struct _bmp_put_pixel_data data;

@@ -62,7 +62,7 @@ vsuplt_plot2_line(vsuplt_plot2_ptr plot2,
 {
     affine2apply_rr(plot2->ctm.T, &x0, &y0);
     affine2apply_rr(plot2->ctm.T, &x1, &y1);
-    vsuplt_bmp_line(&plot2->bmp, (uint32_t)x0, (uint32_t)y0, (uint32_t)x1, (uint32_t)y1, color);
+    vsuplt_bmp_line(&plot2->bmp, x0, y0, x1, y1, color);
 }
 
 /* push current CTM to stack */

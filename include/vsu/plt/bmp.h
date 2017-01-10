@@ -54,15 +54,15 @@ void
 vsuplt_bmp_free(vsuplt_bmp_ptr bmp);
 
 vsuplt_clr
-vsuplt_bmp_get(vsuplt_bmp_ptr bmp, int32_t x, int32_t y);
+vsuplt_bmp_get(vsuplt_bmp_ptr bmp, int64_t x, int64_t y);
 
 void
-vsuplt_bmp_set(vsuplt_bmp_ptr bmp, int32_t x, int32_t y, vsuplt_clr);
+vsuplt_bmp_set(vsuplt_bmp_ptr bmp, int64_t x, int64_t y, vsuplt_clr);
 
 void
 vsuplt_bmp_line(vsuplt_bmp_ptr bmp,
-        int32_t x0, int32_t y0,
-        int32_t x1, int32_t y1,
+        int64_t x0, int64_t y0,
+        int64_t x1, int64_t y1,
         vsuplt_clr color);
 
 void
