@@ -1,4 +1,5 @@
 #include <vsu/plt/bmp.h>
+#include <vsu/plt/util/alg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -91,77 +92,16 @@ vsuplt_bmp_clear(vsuplt_bmp_ptr bmp, vsuplt_clr color)
             vsuplt_bmp_set(bmp, x, y, color);
 }
 
-/*
- * Bresenham line algorithm
- */
-
-/* I: (x0, y0), (x1, y1) */
-/* I: |y1-y0|<|x1-x0| */
-/* I: x0 < x1 */
-/* O: line segment from (x0, y0) to (x1, y1) */
-/*    of color `clr` drawn on `bmp` */
-void
-inline static
-_vsuplt_line_x(vsuplt_bmp_ptr bmp, int32_t x0, int32_t y0, int32_t x1, int32_t y1, vsuplt_clr clr)
+struct _bmp_line_put_pixel_data
 {
-    if (x1 < x0)
-    {
-        int32_t tmp;
-        tmp = x0; x0 = x1; x1 = tmp;
-        tmp = y0; y0 = y1; y1 = tmp;
-    }
-    long kx = x1 - x0;
-    long ky = y1 - y0;
-    int dy = 1;
-    if (ky < 0) dy = -1; /* sign(y1-y0) */
-    ky = 2*ky*dy; /* 2|y1-y0| */
-    kx = -2*kx; /* sign(y1-y0) * 2|x1-x0| */
-    long e = ky - (x1 - x0); /* 2H - W */
-    vsuplt_bmp_set(bmp, x0, y0, clr);
-    for (long x=x0, y=y0; x <= x1; ++x)
-    {
-        if (e > 0)
-        {
-            y += dy;
-            e += kx; /* = e_{j-1} -/+ 2W */
-        }
-        e += ky; /* += 2H */
-        vsuplt_bmp_set(bmp, x, y, clr);
-    }
-}
+    vsuplt_bmp_ptr bmp;
+    vsuplt_clr color;
+};
 
-void
-inline static
-_vsuplt_line_y(vsuplt_bmp_ptr bmp,
-        int x0, int y0,
-        int x1, int y1,
-        vsuplt_clr clr)
+void _bmp_line_put_pixel(void *self, int64_t x, int64_t y)
 {
-
-    if (y1 < y0)
-    {
-        uint32_t tmp;
-        tmp = x0; x0 = x1; x1 = tmp;
-        tmp = y0; y0 = y1; y1 = tmp;
-    }
-    long kx = x1 - x0;
-    long ky = y1 - y0;
-    int dx = 1;
-    if (kx < 0) dx = -1;
-    kx = 2*kx*dx;
-    ky = -2*ky;
-    long e = kx - (y1 - y0);
-    vsuplt_bmp_set(bmp, x0, y0, clr);
-    for (long y=y0, x=x0; y <= y1; ++y)
-    {
-        if (e > 0)
-        {
-            x += dx;
-            e += ky;
-        }
-        e += kx;
-        vsuplt_bmp_set(bmp, x, y, clr);
-    }
+    struct _bmp_line_put_pixel_data *d = self;
+    vsuplt_bmp_set(d->bmp, x, y, d->color);
 }
 
 void
@@ -170,20 +110,13 @@ vsuplt_bmp_line(vsuplt_bmp_ptr bmp,
         int32_t x1, int32_t y1,
         vsuplt_clr clr)
 {
-    register int32_t W = x1 - x0;
-    if (W < 0) W = -W;
-    register int32_t H = y1 - y0;
-    if (H < 0) H = -H;
-    if (W > H)
-    {
-        /* octants 1,4,5,8 */
-        _vsuplt_line_x(bmp, x0, y0, x1, y1, clr);
-    }
-    else
-    {
-        /* 2,3,6,7 */
-        _vsuplt_line_y(bmp, x0, y0, x1, y1, clr);
-    }
+    struct _bmp_line_put_pixel_data data;
+    data.bmp = bmp;
+    data.color = clr;
+    vsuplt_bresenhamline_window(&data, _bmp_line_put_pixel,
+            0, bmp->w, 0, bmp->h,
+            x0, y0,
+            x1, y1);
 }
 
 /*

@@ -10,7 +10,7 @@ if(NOT TARGET vsunum)
     find_package(vsunum)
 endif()
 
-add_library(vsuplt src/bmp.c src/plot2.c src/wireframe.c src/fb.c src/terminal-input.c)
+add_library(vsuplt src/bresenham-line.c src/bmp.c src/plot2.c src/wireframe.c src/fb.c src/terminal-input.c)
 target_link_libraries(vsuplt vsunum)
 
 # REMINDER
