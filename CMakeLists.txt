@@ -10,7 +10,7 @@ if(NOT TARGET vsunum)
     find_package(vsunum)
 endif()
 
-add_library(vsuplt src/bresenham-line.c src/bmp.c src/plot2.c src/wireframe.c src/fb.c src/terminal-input.c)
+add_library(vsuplt src/bresenham-line.c src/fill-poly.c src/bmp.c src/plot2.c src/wireframe.c src/fb.c src/terminal-input.c)
 target_link_libraries(vsuplt vsunum)
 
 # REMINDER
@@ -66,3 +66,7 @@ add_test(test_plot2_wireframe test_plot2_wireframe)
 add_executable(test_fb_flush tests/fb-flush.c)
 target_link_libraries(test_fb_flush vsuplt)
 add_test(test_fb_flush test_fb_flush)
+
+add_executable(test_bmp_triangle tests/fill-poly.c)
+target_link_libraries(test_bmp_triangle vsuplt)
+add_test(test_bmp_triangle test_bmp_triangle)

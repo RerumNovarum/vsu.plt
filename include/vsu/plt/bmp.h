@@ -66,6 +66,13 @@ vsuplt_bmp_line(vsuplt_bmp_ptr bmp,
         vsuplt_clr color);
 
 void
+vsuplt_bmp_triangle(vsuplt_bmp_ptr bmp,
+        int64_t X0, int64_t Y0,
+        int64_t X1, int64_t Y1,
+        int64_t X2, int64_t Y2,
+        vsuplt_clr color);
+
+void
 vsuplt_bmp_clear(vsuplt_bmp_ptr bmp, vsuplt_clr color);
 
 /* out is expected to be binary */

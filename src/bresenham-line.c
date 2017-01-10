@@ -94,20 +94,3 @@ vsuplt_bresenhamline(void *self,
         _vsuplt_bresenhamline_y(self, put_pixel, x0, y0, x1, y1);
     }
 }
-
-void
-vsuplt_bresenhamline_window(void *self,
-        void (*put_pixel)(void *s, int64_t x, int64_t y),
-        int64_t L, int64_t R, int64_t B, int64_t T,
-        int64_t x0, int64_t y0, int64_t x1, int64_t y1)
-{
-    if (x0 < L) x0 = L;
-    if (x1 < L) x1 = L;
-    if (x0 > R) x0 = R;
-    if (x1 > R) x1 = R;
-    if (y0 < B) y0 = B;
-    if (y1 < B) y1 = B;
-    if (y0 > T) y0 = T;
-    if (y1 > T) y1 = T;
-    vsuplt_bresenhamline(self, put_pixel, x0, y0, x1, y1);
-}

@@ -92,17 +92,21 @@ vsuplt_bmp_clear(vsuplt_bmp_ptr bmp, vsuplt_clr color)
             vsuplt_bmp_set(bmp, x, y, color);
 }
 
-struct _bmp_line_put_pixel_data
+/* callbacks for /util */
+
+struct _bmp_put_pixel_data
 {
     vsuplt_bmp_ptr bmp;
     vsuplt_clr color;
 };
 
-void _bmp_line_put_pixel(void *self, int64_t x, int64_t y)
+void _bmp_put_pixel(void *self, int64_t x, int64_t y)
 {
-    struct _bmp_line_put_pixel_data *d = self;
+    struct _bmp_put_pixel_data *d = self;
     vsuplt_bmp_set(d->bmp, x, y, d->color);
 }
+
+/* end of (callbacks) */
 
 void
 vsuplt_bmp_line(vsuplt_bmp_ptr bmp,
@@ -110,13 +114,26 @@ vsuplt_bmp_line(vsuplt_bmp_ptr bmp,
         int32_t x1, int32_t y1,
         vsuplt_clr clr)
 {
-    struct _bmp_line_put_pixel_data data;
+    struct _bmp_put_pixel_data data;
     data.bmp = bmp;
     data.color = clr;
-    vsuplt_bresenhamline_window(&data, _bmp_line_put_pixel,
-            0, bmp->w, 0, bmp->h,
+    vsuplt_bresenhamline(&data, _bmp_put_pixel,
             x0, y0,
             x1, y1);
+}
+
+void
+vsuplt_bmp_triangle(vsuplt_bmp_ptr bmp,
+        int64_t X0, int64_t Y0,
+        int64_t X1, int64_t Y1,
+        int64_t X2, int64_t Y2,
+        vsuplt_clr color)
+{
+    struct _bmp_put_pixel_data data;
+    data.bmp = bmp;
+    data.color = color;
+    vsuplt_fill_triangle(&data, _bmp_put_pixel,
+            X0, Y0, X1, Y1, X2, Y2);
 }
 
 /*
