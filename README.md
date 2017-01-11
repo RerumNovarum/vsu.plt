@@ -9,13 +9,22 @@ Structure
 ```
 vsu/
     plt/
-        bmp.h
-        plot2.h
-        wireframe2.h
-        plot3.h
-        polymesh3.h
+        bmp.h /* bitmap */
+        plot2.h /* plot with affine transforms &c */
+        wireframe.h /* generic wireframe model structure */
+        polymesh.h /* 3d polygonal meshmodel */
         backend/
-                fb.h
+                fb.h /* framebuffer output for bmp.h */
         util/
-                showplot.h
+                alg.h /* reusable bresenham line drawing algo, filling shapes &c */
 ```
+
+Examples
+--------
+
+See [show-wireframe.c](src/show-wireframe.c), [tests/*.c](tests/).
+
+Documentation
+------------
+
+See [include/](include/)
