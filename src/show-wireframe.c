@@ -4,6 +4,21 @@
 #include <vsu/plt/backend/fb.h>
 #include <math.h>
 
+/* draws 2dim wireframe model into framebuffer.
+ * usage:
+ * $ sudo -g video ./wireframe /dev/fb0 model.wf
+ * 
+ * You should use appropriate video driver.
+ * For example, use it in console (tty)
+ * or in the X with fbdev driver.
+ *
+ * navigation:
+ *  hjkl translates the model,
+ *  r and R rotate in positive and negative direction respectively,
+ *  - and + scale.
+ * keys are read from terminal in noncanonical mode.
+ */
+
 int ret = 0;
 
 struct data
