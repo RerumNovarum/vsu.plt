@@ -99,6 +99,10 @@ int main(int argc, char **argv)
     d.handle['r'] = vsuplt_wireframe2_transform_int;
     d.t_d['R'] = affine2rot(-DPHI);
     d.handle['R'] = vsuplt_wireframe2_transform_int;
+    d.t_d['m'] = affine2scale(+1, -1);
+    d.handle['m'] = vsuplt_wireframe2_transform_int;
+    d.t_d['M'] = affine2scale(-1, +1);
+    d.handle['M'] = vsuplt_wireframe2_transform_int;
     for (int i = 0; i < sizeof(fb.in.handlers)/sizeof(*fb.in.handlers); ++i) {
         fb.in.handlers[i] = _on_navig2;
     }
