@@ -57,6 +57,9 @@ install(EXPORT vsuplt-config DESTINATION share/libvsu/)
 add_executable(test_fb_interactive tests/fb-interactive.c)
 target_link_libraries(test_fb_interactive vsuplt)
 
+add_executable(test_vsuplt_lines_interactive tests/test_vsuplt_lines_interactive.c)
+target_link_libraries(test_vsuplt_lines_interactive vsuplt)
+
 enable_testing()
 
 add_executable(test_plt_api tests/test_vsuplt_pub_api.c)

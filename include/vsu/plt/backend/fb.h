@@ -16,6 +16,8 @@ struct vsuplt_fb
 	struct fb_fix_screeninfo finf;
 	struct fb_var_screeninfo vinf;
 	vsuplt_bmp_ptr bmp;
+    uint8_t *buf;
+    size_t buf_size;
 	int fb_fd;
 	size_t fb_w, fb_h;
 	char *fb_fname;
@@ -35,5 +37,8 @@ vsuplt_fb_redraw_flush(vsuplt_fb_ptr fb);
 
 void
 vsuplt_fb_open(vsuplt_fb_ptr fb);
+
+void
+vsuplt_fb_free(vsuplt_fb_ptr fb);
 
 #endif /* ifndef _VSUPLT_FB_H_ */

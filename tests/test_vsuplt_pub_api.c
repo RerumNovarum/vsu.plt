@@ -78,21 +78,23 @@ int main()
 
     vsuplt_plot2_clear(plot, VSUPLT_COLOR_WHITE);
     vsuplt_plot2_save_ctm(plot);
-    vsuplt_plot2_tr(plot, x0, y0);
-    int n = 8; 
-    for (int k = 0; k < 2*n; ++k) {
-        vsuplt_plot2_line(plot, 0, 0, a, 0, VSUPLT_COLOR_RED);
-        vsuplt_plot2_rot(plot, M_PI/n);
-    }
-    vsuplt_plot2_restore_ctm(plot);
-    vsuplt_plot2_tr(plot, .1*_IMG_W, .1*_IMG_H);
-    vsuplt_plot2_scale(plot, .8*_IMG_W, .8*_IMG_H);
+    vsuplt_plot2_pretransform(plot, affine2tr(.1*_IMG_W, .1*_IMG_H));
+    vsuplt_plot2_pretransform(plot, affine2scale(.8*_IMG_W, .8*_IMG_H));
     vsuplt_plot2_line(plot, 0, 0, 1, 0, VSUPLT_COLOR_BROWN);
     vsuplt_plot2_line(plot, 1, 0, 1, 1, VSUPLT_COLOR_BROWN);
     vsuplt_plot2_line(plot, 1, 1, 0, 1, VSUPLT_COLOR_BROWN);
     vsuplt_plot2_line(plot, 0, 1, 0, 0, VSUPLT_COLOR_BROWN);
-    vsuplt_plot2_line(plot, 0, 0, .5, .5, VSUPLT_COLOR_RED);
+    vsuplt_plot2_line(plot, 0, 0, .5, .5, VSUPLT_COLOR_BLUE);
     vsuplt_plot2_line(plot, .5, .5, 1, 0, VSUPLT_COLOR_MAGENTA);
+
+    vsuplt_plot2_pretransform(plot, affine2tr(.5, .5));
+    int n = 8;
+    struct affine2 rot = affine2rot(M_PI/n);
+    for (int k = 0; k < 2*n; ++k) {
+        vsuplt_plot2_pretransform(plot, rot);
+        vsuplt_plot2_line(plot, 0, 0, .5, 0, VSUPLT_COLOR_RED);
+    }
+    vsuplt_plot2_restore_ctm(plot);
     vsuplt_plot2_print_ppm_file(plot, "test_vsuplt_plot2_line.ppm");
 
     vsuplt_plot2_free(plot);

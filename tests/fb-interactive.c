@@ -52,8 +52,7 @@ void post_init(vsuplt_fb_ptr fb)
     fb->bmp = &d->plot->bmp;
     vsuplt_wireframe2_transform(d->wf, affine2mul_n(2,
                 affine2tr(0, fb->fb_h),
-                affine2scale(1, -1)
-                ));
+                affine2scale(1, -1)));
 }
 
 void redraw(vsuplt_fb_ptr fb)

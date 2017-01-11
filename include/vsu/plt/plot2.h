@@ -47,27 +47,38 @@ void
 vsuplt_plot2_clear(vsuplt_plot2_ptr plot, vsuplt_clr color);
 
 /* push current CTM to stack */
-void vsuplt_plot2_save_ctm(vsuplt_plot2_ptr plot2);
+void vsuplt_plot2_save_ctm(vsuplt_plot2_ptr plot);
 
 /* pop and use CTM from stack */
-void vsuplt_plot2_restore_ctm(vsuplt_plot2_ptr plot2);
+void vsuplt_plot2_restore_ctm(vsuplt_plot2_ptr plot);
+
+/* Add T to the end of the sequence of transformations
+ * that will be applied to the point before lighting up the pixel
+ */
+void vsuplt_plot2_transform(vsuplt_plot2_ptr plot, struct affine2 T);
+
+/* Insert T into the begining of the sequence */
+void vsuplt_plot2_pretransform(vsuplt_plot2_ptr plot, struct affine2 T);
+
+/* Transform "internally", with symmetry relative to the centroid */
+void vsuplt_plot2_transform_int(vsuplt_plot2_ptr plot, struct affine2 T);
 
 /* rotate about pole by angle phi in user coordinates */
-void vsuplt_plot2_rot(vsuplt_plot2_ptr plot2, RR phi);
+void vsuplt_plot2_rot(vsuplt_plot2_ptr plot, RR phi);
 
 /* scale current X axis by x and Y by y */
-void vsuplt_plot2_scale(vsuplt_plot2_ptr plot2, RR x, RR y);
+void vsuplt_plot2_scale(vsuplt_plot2_ptr plot, RR x, RR y);
 
 /* translate by a vector with user coordinates (x, y) */
-void vsuplt_plot2_tr(vsuplt_plot2_ptr plot2, RR x, RR y);
+void vsuplt_plot2_tr(vsuplt_plot2_ptr plot, RR x, RR y);
 
 /* get CTM */
 struct affine2
-vsuplt_get_affine(vsuplt_plot2_ptr plot2);
+vsuplt_get_affine(vsuplt_plot2_ptr plot);
 
 /* set CTM */
 void
-vsuplt_set_affine(vsuplt_plot2_ptr plot2, struct affine2 t);
+vsuplt_set_affine(vsuplt_plot2_ptr plot, struct affine2 t);
 
 void
 vsuplt_plot2_print_ppm_file(vsuplt_plot2_ptr plot, char *filename);

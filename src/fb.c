@@ -20,22 +20,33 @@ void
 vsuplt_fb_flush(vsuplt_fb_ptr fb)
 {
 	vsuplt_bmp_ptr bmp = fb->bmp;
+    if (fb->bmp == NULL)
+        err(1, "vsuplt_fb_flush: bmp = NULL");
 	if (fb->fb_fd == -1)
-        err(1, "vsuplt_fb_draw_bmp: bad fb_fd");
+        err(1, "vsuplt_fb_flush: bad fb_fd");
     if (fb->vinf.bits_per_pixel != 32)
-        err(1, "vsuplt_fb_draw_bmp: inconvenient value of bits_per_pixel");
+        err(1, "vsuplt_fb_flush: inconvenient value of bits_per_pixel");
+
+    uint8_t *buf_base;
+    uint32_t xoffset, yoffset, line_length;
+
+    buf_base = fb->buf;
+    xoffset = fb->vinf.xoffset;
+    yoffset = fb->vinf.yoffset;
+    line_length = fb->finf.line_length;
+
     for (long y = 0; y < fb->fb_h; ++y) {
-        off_t o = fb->vinf.xoffset + (y + fb->vinf.yoffset)*fb->finf.line_length;
-        o = lseek(fb->fb_fd, o, SEEK_SET);
-        if (o == -1) err(1, "lseek failed");
+        uint32_t *buf = (uint32_t*)(buf_base + y * line_length);
+
         for (long x = 0; x < fb->fb_w; ++x) {
-            vsuplt_clr clr = vsuplt_bmp_get(bmp, x, bmp->h - y - 1);
+            vsuplt_clr clr = vsuplt_bmp_get(bmp, x, fb->fb_h - y - 1);
             uint32_t px = rgb(fb, VSUPLT_R(clr), VSUPLT_G(clr), VSUPLT_B(clr));
-            if (write(fb->fb_fd, &px, 4) != 4) {
-                err(1, "vsuplt_fb_draw_bmp failed to write");
-            }
+            buf[x] = px;
         }
     }
+    off_t o = lseek(fb->fb_fd, yoffset * line_length + xoffset, SEEK_SET);
+    if (o == -1) err(1, "vsuplt_fb_flush: failed to lseek()");
+    write(fb->fb_fd, buf_base, fb->fb_h * fb->finf.line_length);
 }
 
 void
@@ -67,6 +78,24 @@ vsuplt_fb_open(vsuplt_fb_ptr fb)
 
 	fb->fb_w = fb->vinf.xres_virtual;
 	fb->fb_h = fb->vinf.yres_virtual;
+
+    /* note: 4 = bits_per_pixels/8 */
+    fb->buf_size = fb->finf.line_length * fb->vinf.yres_virtual;
+    fb->buf = malloc(fb->buf_size);
+    if (fb->buf == NULL) err(1, "vsuplt_fb_open: failed to malloc() buffer");
+}
+
+void
+vsuplt_fb_free(vsuplt_fb_ptr fb)
+{
+    if (fb->buf != NULL) {
+        free(fb->buf);
+        fb->buf = NULL;
+    }
+    if (fb->fb_fd != -1) {
+        close(fb->fb_fd);
+        fb->fb_fd = -1;
+    }
 }
 
 void
