@@ -106,7 +106,6 @@ vsuplt_wireframe2_transform(vsuplt_wireframe_ptr wf,
         struct affine2 T)
 {
     wf->ctm = affine2mul(T, wf->ctm);
-    affine2apply_rr(T, wf->centroid, wf->centroid + 1);
 }
 
 void
@@ -118,10 +117,10 @@ vsuplt_wireframe2_transform_int(vsuplt_wireframe_ptr wf,
     tr.b1 *= -1;
     tr.b2 *= -1;
     wf->ctm = affine2mul_n(4,
+            wf->ctm,
             tr_inv,
             T,
-            tr,
-            wf->ctm);
+            tr);
 }
 static inline uint32_t
 _wf_i(vsuplt_wireframe_ptr wf, uint32_t e) {
