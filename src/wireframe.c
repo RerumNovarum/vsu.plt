@@ -92,7 +92,7 @@ vsuplt_wireframe_load(FILE *in)
 }
 
 vsuplt_wireframe_ptr
-vusplt_wireframe_load_file(char *filename)
+vsuplt_wireframe_load_file(char *filename)
 {
     FILE *in = fopen(filename, "r");
     vsuplt_wireframe_ptr wf;
