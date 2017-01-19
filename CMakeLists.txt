@@ -10,7 +10,10 @@ if(NOT TARGET vsunum)
     find_package(vsunum)
 endif()
 
-add_library(vsuplt src/bresenham-line.c src/fill-poly.c src/bmp.c src/plot2.c src/wireframe.c src/fb.c src/terminal-input.c)
+add_library(vsuplt src/bresenham-line.c src/fill-poly.c
+    src/plotgraph.c
+    src/bmp.c src/plot2.c src/wireframe.c
+    src/fb.c src/terminal-input.c)
 target_link_libraries(vsuplt vsunum)
 
 # REMINDER
@@ -59,6 +62,12 @@ target_link_libraries(test_fb_interactive vsuplt)
 
 add_executable(test_vsuplt_lines_interactive tests/test_vsuplt_lines_interactive.c)
 target_link_libraries(test_vsuplt_lines_interactive vsuplt)
+
+add_executable(cardioid src/show-plotgraph-cardioid.c)
+target_link_libraries(cardioid vsuplt)
+
+add_executable(cubspline src/showcubspline.c)
+target_link_libraries(cubspline vsuplt)
 
 enable_testing()
 

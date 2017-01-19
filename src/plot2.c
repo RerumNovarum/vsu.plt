@@ -23,6 +23,11 @@ vsuplt_plot2_init(vsuplt_plot2_ptr plot,
             affine2scale(buf_width/(R-L), 1.0*buf_height/(T-B)),
             plot->ctm.T = affine2tr(-L, -B));
 
+    RR cx = .5*R + .5*L;
+    RR cy = .5*T + .5*B;
+    plot->centroid_to_origin = affine2tr(-cx, -cy);
+    plot->origin_to_centroid = affine2tr(cx, cy);
+
     plot->must_free_self = must_free_self;
 }
 
@@ -102,9 +107,9 @@ void vsuplt_plot2_transform_int(vsuplt_plot2_ptr plot, struct affine2 T)
 {
     vsuplt_plot2_pretransform(plot, 
             affine2mul_n(3,
-                affine2tr(.5*plot->bmp.w, .5*plot->bmp.h),
+                plot->origin_to_centroid,
                 T,
-                affine2tr(-.5*plot->bmp.w, -.5*plot->bmp.h)));
+                plot->centroid_to_origin));
 }
 
 /* translate by a vector with user coordinates (x, y) */

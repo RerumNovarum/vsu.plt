@@ -14,6 +14,8 @@ struct vsuplt_plot2
 {
     struct vsuplt_bmp bmp;
     struct vsuplt_ctm2 ctm;
+    struct affine2 centroid_to_origin;
+    struct affine2 origin_to_centroid;
     bool must_free_self;
 };
 
