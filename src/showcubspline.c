@@ -101,7 +101,19 @@ void post_init(vsuplt_fb_ptr fb)
         dimy /= dimx;
         dimx = 1;
     }
-    d->plot = vsuplt_plot2_alloc(fb->fb_w, fb->fb_h, -.5*dimx, .5*dimx, -.5*dimy, .5*dimy);
+    d->plot = vsuplt_plot2_alloc(fb->fb_w, fb->fb_h, 0, fb->fb_w, 0, fb->fb_h);
+    /* TODO: just make another layour to abstract all this crap out */
+    RR cx = .5;
+    RR cy = .5;
+    d->plot->centroid_to_origin = affine2tr(-cx, -cy);
+    d->plot->origin_to_centroid = affine2tr(cx, cy);
+    d->plot->ctm.T = affine2mul_n(2,
+            affine2tr(
+                fb->fb_w*(.5-.5/dimx),
+                fb->fb_h*(.5-.5/dimy)
+                ),
+            affine2scale(fb->fb_w/dimx, fb->fb_h/dimy)
+            );
     vsuplt_plot2_clear(d->plot, VSUPLT_COLOR_BLACK);
     fb->bmp = &d->plot->bmp;
     d->graph = vsuplt_plotgraph2_alloc(NUM_PTS);
