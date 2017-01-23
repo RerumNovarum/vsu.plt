@@ -1,0 +1,221 @@
+\documentclass[a4paper]{article}
+
+\usepackage{amsthm,amsmath,amsfonts}
+\usepackage{hyperref}
+\usepackage{pdfpages}
+\usepackage{listings}
+
+\title{3D scene visualization}
+\author{Sergey V Kozlukov \(\langle\texttt{rerumnovarum@openmailbox.org}\rangle\)}
+
+\begin{document}
+\maketitle
+
+\section{Problem statement}
+The task is to render an image from 3D scene
+composed of the \textsc{Camera} and  wireframe and polygonal models.
+A wireframe model is composed of the set of \textsc{Vertices}
+(which are just \( \mathbb{R}^3 \) points)
+and the set of (undirected) \textsc{Edges} (which are unordered pairs of vertices).
+A polygonal model is a pair of the set of \textsc{Vertices} and the set of \textsc{Faces}
+which are basically triples of distinct vertices, composing a triangle.
+
+Polygonal models can be stored in the (subset of) Wavefront's \texttt{.obj} file format:
+
+\begin{lstlisting}[frame=single]
+# .obj file is ascii-encoded
+
+# Vertices, one at a line, encoded as the letter 'v'
+# followed by space-separated decimal numbers triples
+v [v1.x] [v1.y] [v1.z]
+v [v2.x] [v2.y] [v2.z]
+# ...
+v [vn.x] [vn.y] [vn.z]
+
+# Faces
+# described by triples of vertices' serial numbers.
+# Vertices are enumerated from $1$ through $n$.
+f [f1.u] [f1.v] [f2.w]
+f [f2.u] [f2.v] [f2.w]
+# ...
+f [fm.u] [fm.v] [fm.w]
+\end{lstlisting}
+
+The \( \textsc{Camera} = \left(C,T,N,D,\texttt{method}\right) \)
+describes the way a model is projected onto the screen
+and is defined by its location \( C \),
+orientation which is derived from spectator's "top" vector \( T \),
+direction \( -N \),
+the focal length \( D \),
+and the projection \texttt{method} which will be either orthogonal or perspective.
+The orthogonal projection found by descending a perpendicular
+from given point onto viewport.
+The perspective projection is
+the intersection of the viewport plane
+and the ray passing through both camera and point.
+This is illustrated on the picture below:
+
+\includegraphics{coordinates.pdf}
+
+Our renderer will not account for lights and other subtleties.
+It will simply project points of the world-space onto virtual "viewport"
+also clipping invisible ones.
+
+\section{Projecting a single point}
+Say we're given a \( \textsc{Camera} \) and a point \( p^w = (p_x^w,p_y^w,p_z^w) \)
+and the task is to map \( p^w \) into a point on the screen to light up the pixel.
+To begin with we will map the world-coordinates \(X_w,Y_w,Z_w\) into view-coordinates \( X_v,Y_v,Z_v \).
+This is done with an affine mapping \( \mathit{Proj}_{W\to V} \) composed of
+translating the viewport origin \( S = C - \frac{D}{\|N\|} N \) to \( 0 \)
+and matching axes via rotation.
+Axes though are to be defined.
+Unit-vectors \( i,j,k \) collinear with axes \( X_v,Y_v,Z_v \)
+should form an orthogonal right-hand system,
+\( k \) is codirectional to \( N \)
+and \( T \) and \( j \) lie in the same plane.
+Hence one can choose
+\[ k = \frac{N}{\|N\|}, \]
+\[ j = \frac{T - \langle T,k \rangle k}{\|T - \langle T,k \rangle k\|}, \]
+\[ i = j\times k, \]
+where \(\langle\cdot,\cdot\rangle\) and \( \times \) denote dot and products respectively.
+The latter step of projection (i.e. superposing axes)
+is the linear transform which maps \( i,j,k \)
+into vectors of the canonical basis \( e_1=(1,0,0), e_2=(0,1,0), e_3=(0,0,1) \).
+This essentialy means that the inverse transform
+acts as a multiplication by orthogonal matrix
+composed of columns-vectors \( i, j, k \).
+The inverse of orthogonal matrix is its transpose.
+That yields us immediately that
+\[ \mathit{Proj}_{W\to V} \mathtt{Proj}_{W\to V} =
+\begin{pmatrix}
+    i_x & i_y & i_z & 0 \\
+    j_x & j_y & j_z & 0 \\
+    k_x & k_y & k_z & 0 \\
+    0   & 0   & 0   & 1 \\
+\end{pmatrix}
+\begin{pmatrix}
+    1 & 0 & 0 & -S_x \\
+    0 & 1 & 0 & -S_y \\
+    0 & 0 & 1 & -S_z \\
+    0 & 0 & 0 & 1 \\
+\end{pmatrix}, \]
+where italic and monospace fonts correspond to a mapping and matrix respectively.
+The orthogonal projection hence
+simply discards the third coordinate after applying \( \mathit{Proj}_{W\to V} \):
+\[
+    \mathit{Proj}_\mathtt{orthogonal} \sim
+    \begin{pmatrix}
+        1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+        i_x & i_y & i_z & 0 \\
+        j_x & j_y & j_z & 0 \\
+        k_x & k_y & k_z & 0 \\
+        0   & 0   & 0   & 1 \\
+    \end{pmatrix}
+    \begin{pmatrix}
+        1 & 0 & 0 & -S_x \\
+        0 & 1 & 0 & -S_y \\
+        0 & 0 & 1 & -S_z \\
+        0 & 0 & 0 & 1 \\
+    \end{pmatrix}, \]
+\[
+    \begin{pmatrix} p_x^o \\ p_y^o \end{pmatrix} =
+        \mathit{Proj}_\mathtt{orthogonal}
+        \begin{pmatrix} p_x^w \\ p_y^w \\ p_z^w \\ 1 \end{pmatrix}.
+    \]
+
+To find a perspective projection we will "emit"
+a ray from camera, i.e. \( (0,0,D)_v \)
+into given point \( p^w \) with view-coordinates
+\( (p_x^v,p_y^v,p_z^v) \),
+that is \( \mathbb{R}_+\to\mathbb{R}^3:t\mapsto (0,0,D) + t (p^w - (0,0,D)) \).
+It intersects the viewport plane once \( D + t(p_z^v-D) = 0 \),
+i.e. \( t = \frac{D}{D-p_z^v} \):
+\[ p_\mathtt{perspective} = \frac{D}{D-p_z^v}\begin{pmatrix} p_x^v \\ p_y^v \end{pmatrix}. \]
+Such transformations correspond to multiplication
+by the following matrix in homogeneous coordinates:
+\[
+    \mathtt{Proj}_\mathtt{perspective} =
+    \begin{pmatrix}
+        1 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 \\
+        0 & 0 & -\frac1D & 1
+    \end{pmatrix}
+    \begin{pmatrix}
+        i_x & i_y & i_z & 0 \\
+        j_x & j_y & j_z & 0 \\
+        k_x & k_y & k_z & 0 \\
+        0   & 0   & 0   & 1 \\
+    \end{pmatrix}
+    \begin{pmatrix}
+        1 & 0 & 0 & -S_x \\
+        0 & 1 & 0 & -S_y \\
+        0 & 0 & 1 & -S_z \\
+        0 & 0 & 0 & 1 \\
+    \end{pmatrix}, \]
+\[
+    \begin{pmatrix} \alpha p_x^p \\ \alpha p_y^p \\ \alpha \end{pmatrix} =
+        \mathit{Proj}_\mathtt{perspective}
+        \begin{pmatrix} p_x^w \\ p_y^w \\ p_z^w \\ 1 \end{pmatrix}. \]
+
+\section{Matching given vector with the \(x\)-axis via affine transformation}
+The problem is, given a non-zero vector \( v \)
+non-colinear with \(e_x\)
+to find a rotation affine transform \( \mathcal{R}_{v,x} \)
+that will superimpose \(v\) and \(x\)-axis.
+There are many ways to do so.
+To begin with,
+just like in the previous section let
+\( i = v/\|v\| \),
+\( j = \frac{e_x - \langle e_x,i\rangle i}{\|e_x - \langle e_x,i\rangle i\|} \),
+\( k = i\times j \).
+\( \mathcal{\tilde R}_{v,x}^{-1} e_x = i \),
+\( \mathcal{\tilde R}_{v,x}^{-1} e_y = j \),
+\( \mathcal{\tilde R}_{v,x}^{-1} e_z = k \).
+Then the following linear transform
+will match the vector and axis
+and preserve scale and orientation
+\[ \mathcal{\tilde R}_{v,x} \sim
+    \begin{pmatrix}
+        i_x & i_y & i_z & 0 \\
+        j_x & j_y & j_z & 0 \\
+        k_x & k_y & k_z & 0 \\
+        0   & 0   & 0   & 1 
+    \end{pmatrix}. \]
+
+\subsection{The least rotation principle}
+It might be desirable to find a transforms
+which  performs "the least" possible rotation
+to match the given vector \( v \) with \(x\)-axis.
+That is to find a transform
+of rotation in the \((v,X)\) plane.
+
+To do so we might apply \( \mathcal{\tilde R}_{v,x} \)
+then perform rotation in \((Y,Z)\) plane
+and transform back with \( \mathcal{\tilde R}_{v,x}^{-1} \).
+It is apparent how much to rotate:
+\( c = \cos\phi = \langle e_x, i \rangle \),
+\( s = \sin\phi = \| e_x\times i \| \).
+Hence
+\[ \mathcal{R}_{v,x} \sim
+    \begin{pmatrix}
+        i_x & j_x & k_x & 0 \\
+        i_y & j_y & k_y & 0 \\
+        i_z & j_z & k_z & 0 \\
+        0   & 0   & 0   & 1 
+    \end{pmatrix}
+    \begin{pmatrix}
+        1 & 0  & 0  & 0 \\
+        0 & c  & -s & 0 \\
+        0 & -s & c  & 0 \\
+        0 & 0  & 0  & 1
+    \end{pmatrix}
+    \begin{pmatrix}
+        i_x & i_y & i_z & 0 \\
+        j_x & j_y & j_z & 0 \\
+        k_x & k_y & k_z & 0 \\
+        0   & 0   & 0   & 1 
+    \end{pmatrix}. \]
+
+\end{document}
