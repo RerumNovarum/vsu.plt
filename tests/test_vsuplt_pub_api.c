@@ -1,77 +1,102 @@
 #include <error.h>
 #include <stdio.h>
 #include <err.h>
-#include <vsu/plt.h>
+#include <vsu/plt/plot2.h>
+#include <math.h>
 
-#define _IMG_W (768)
-#define _IMG_H (512)
-#define _IMG_BUF_SZ (_IMG_W * _IMG_H * VSUPLT_PIXEL_SZ)
+#define _IMG_W (1536)
+#define _IMG_H (1536)
 
 #define _MSG_DOESNT_SET_PIXEL \
     "vsuplt_pixel doesn't set the color"
 #define _MSG_DOESNT_RESET_PIXEL \
-    "vsuplt_init_ctx doesn't reset pixels"
+    "vsuplt_init_plot2 doesn't reset pixels"
 
 int main()
 {
-    unsigned char buf[_IMG_BUF_SZ];
-    vsuplt_ctx ctx;
-    vsuplt_init_ctx(&ctx, buf, _IMG_BUF_SZ, _IMG_W, _IMG_H);
+    vsuplt_plot2_ptr plot = vsuplt_plot2_alloc(_IMG_W, _IMG_H, 0, _IMG_W, 0, _IMG_H);
 
     bool skipcase = false;
     for (int x = 0; x < _IMG_W && !skipcase; ++x)
     {
         for (int y = 0; y < _IMG_H && !skipcase; ++y)
         {
-            if (vsuplt_get_px(&ctx, x, y) != 0)
+            if (vsuplt_bmp_get(&plot->bmp, x, y) != 0)
             {
                 printf(_MSG_DOESNT_RESET_PIXEL
                         "; (%d %d %X)" "\n",
-                        x, y, vsuplt_get_px(&ctx, x, y));
+                        x, y, vsuplt_bmp_get(&plot->bmp, x, y));
                 skipcase = true;
             }
         }
     }
 
-    vsuplt_set_px(&ctx, 0, 0, VSUPLT_RED);
-    vsuplt_print_ppm_file(&ctx, "test_vsuplt_pub_api.blank.ppm");
-    if (vsuplt_get_px(&ctx, 0, 0) != VSUPLT_RED)
+    vsuplt_bmp_set(&plot->bmp, 0, 0, VSUPLT_COLOR_RED);
+    vsuplt_plot2_print_ppm_file(plot, "single_pixel.ppm");
+    if (vsuplt_bmp_get(&plot->bmp, 0, 0) != VSUPLT_COLOR_RED)
         err(1, _MSG_DOESNT_SET_PIXEL "\n");
-    vsuplt_set_px(&ctx, 0, 0, VSUPLT_BLACK);
-    if (vsuplt_get_px(&ctx, 0, 0) != VSUPLT_BLACK)
+    vsuplt_bmp_set(&plot->bmp, 0, 0, VSUPLT_COLOR_BLACK);
+    if (vsuplt_bmp_get(&plot->bmp, 0, 0) != VSUPLT_COLOR_BLACK)
         err(1, _MSG_DOESNT_SET_PIXEL "\n");
 
     skipcase = false;
     for (int x = 0; x < _IMG_W && !skipcase; ++x)
     {
         int y0 = (1+_IMG_H)/2;
-        vsuplt_set_px(&ctx, x, y0, VSUPLT_RED);
-        if (vsuplt_get_px(&ctx, x, y0) != VSUPLT_RED)
+        vsuplt_bmp_set(&plot->bmp, x, y0, VSUPLT_COLOR_RED);
+        if (vsuplt_bmp_get(&plot->bmp, x, y0) != VSUPLT_COLOR_RED)
         {
-            printf(_MSG_DOESNT_SET_PIXEL "; (%d %d %X)" "\n", x, y0, VSUPLT_RED);
+            printf(_MSG_DOESNT_SET_PIXEL "; (%d %d %X)" "\n", x, y0, VSUPLT_COLOR_RED);
             skipcase=true;
         }
     }
 
-    vsuplt_print_ppm_file(&ctx, "test_vsuplt_pub_api.ppm");
+    vsuplt_plot2_print_ppm_file(plot, "vsuplt_bmp_set.ppm");
 
-    vsuplt_clear(&ctx, VSUPLT_WHITE);
+    vsuplt_plot2_clear(plot, VSUPLT_COLOR_WHITE);
     for (int y = 0; y < _IMG_H; ++y)
         for (int x = 0; x < _IMG_W; ++x)
-            if (vsuplt_get_px(&ctx, x, y) != VSUPLT_WHITE)
-                err(1, "vsuplt_clear doesn't clear");
+            if (vsuplt_bmp_get(&plot->bmp, x, y) != VSUPLT_COLOR_WHITE)
+                err(1, "vsuplt_plot2_clear doesn't clear");
+
+    /* affine things */
+
     int x0 = _IMG_W/2;
     int y0 = _IMG_H/2;
-    int a = 128, b = 64;
-    vsuplt_line_px(&ctx, x0, y0, x0+a, y0+b, VSUPLT_RED);
-    vsuplt_line_px(&ctx, x0, y0, x0-a, y0+b, VSUPLT_BLUE);
-    vsuplt_line_px(&ctx, x0, y0, x0+a, y0-b, VSUPLT_BLUE);
-    vsuplt_line_px(&ctx, x0, y0, x0-a, y0-b, VSUPLT_RED);
-    vsuplt_line_px(&ctx, x0, y0, x0+b, y0+a, VSUPLT_BLACK);
-    vsuplt_line_px(&ctx, x0, y0, x0+b, y0-a, VSUPLT_GREEN);
-    vsuplt_line_px(&ctx, x0, y0, x0-b, y0-a, VSUPLT_GREEN);
-    vsuplt_line_px(&ctx, x0, y0, x0-b, y0+a, VSUPLT_BLACK);
-    vsuplt_print_ppm_file(&ctx, "test_vsuplt_line_px.ppm");
-    vsuplt_destroy_ctx(&ctx);
+    int a = .25*_IMG_W, b = .3*_IMG_H;
+    vsuplt_bmp_line(&plot->bmp, x0, y0, x0+a, y0+b, VSUPLT_COLOR_RED);
+    vsuplt_bmp_line(&plot->bmp, x0, y0, x0-a, y0+b, VSUPLT_COLOR_BLUE);
+    vsuplt_bmp_line(&plot->bmp, x0, y0, x0+a, y0-b, VSUPLT_COLOR_BLUE);
+    vsuplt_bmp_line(&plot->bmp, x0, y0, x0-a, y0-b, VSUPLT_COLOR_RED);
+    vsuplt_bmp_line(&plot->bmp, x0, y0, x0+b, y0+a, VSUPLT_COLOR_BLACK);
+    vsuplt_bmp_line(&plot->bmp, x0, y0, x0+b, y0-a, VSUPLT_COLOR_GREEN);
+    vsuplt_bmp_line(&plot->bmp, x0, y0, x0-b, y0-a, VSUPLT_COLOR_GREEN);
+    vsuplt_bmp_line(&plot->bmp, x0, y0, x0-b, y0+a, VSUPLT_COLOR_BLACK);
+    vsuplt_bmp_line(&plot->bmp, x0, y0, x0-a, y0,   VSUPLT_COLOR_PURPLE);
+    vsuplt_bmp_line(&plot->bmp, x0, y0, x0+a, y0,   VSUPLT_COLOR_MAGENTA);
+    vsuplt_plot2_print_ppm_file(plot, "test_vsuplt_bmp_line.ppm");
+
+    vsuplt_plot2_clear(plot, VSUPLT_COLOR_WHITE);
+    vsuplt_plot2_save_ctm(plot);
+    vsuplt_plot2_pretransform(plot, affine2tr(.1*_IMG_W, .1*_IMG_H));
+    vsuplt_plot2_pretransform(plot, affine2scale(.8*_IMG_W, .8*_IMG_H));
+    vsuplt_plot2_line(plot, 0, 0, 1, 0, VSUPLT_COLOR_BROWN);
+    vsuplt_plot2_line(plot, 1, 0, 1, 1, VSUPLT_COLOR_BROWN);
+    vsuplt_plot2_line(plot, 1, 1, 0, 1, VSUPLT_COLOR_BROWN);
+    vsuplt_plot2_line(plot, 0, 1, 0, 0, VSUPLT_COLOR_BROWN);
+    vsuplt_plot2_line(plot, 0, 0, .5, .5, VSUPLT_COLOR_BLUE);
+    vsuplt_plot2_line(plot, .5, .5, 1, 0, VSUPLT_COLOR_MAGENTA);
+
+    vsuplt_plot2_pretransform(plot, affine2tr(.5, .5));
+    int n = 8;
+    struct affine2 rot = affine2rot(M_PI/n);
+    for (int k = 0; k < 2*n; ++k) {
+        vsuplt_plot2_pretransform(plot, rot);
+        vsuplt_plot2_line(plot, 0, 0, .5, 0, VSUPLT_COLOR_RED);
+    }
+    vsuplt_plot2_restore_ctm(plot);
+    vsuplt_plot2_print_ppm_file(plot, "test_vsuplt_plot2_line.ppm");
+
+    vsuplt_plot2_free(plot);
     return 0;
 }
