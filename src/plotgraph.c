@@ -86,8 +86,8 @@ vsuplt_plot2_plotgraph(vsuplt_plot2_ptr plot,
     }
     vsuplt_plot2_pretransform(plot, affine2tr(.5, .5));
     vsuplt_plot2_pretransform(plot, affine2scale(
-                    .5/(graph.xmax-graph.xmin),
-                    .5/(graph.ymax-graph.ymin))); /* this is so... lispy */
+                    1.0/(graph.xmax-graph.xmin),
+                    1.0/(graph.ymax-graph.ymin))); /* this is so... lispy */
     for (uint32_t i = 1; i < graph.num_pts; ++i) {
         vsuplt_plot2_line(plot, x[i], y[i], x[i-1], y[i-1], graph.color);
     }
